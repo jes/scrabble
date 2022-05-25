@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 type LetterBag struct {
 	letters []byte
 }
@@ -16,12 +18,14 @@ var letterCount = map[byte]int{
 func NewLetterBag() *LetterBag {
 	l := LetterBag{}
     // put all the letters in the bag
-    for c := 'a'; c <= 'z'; c++ {
-        for i := 0; i < letterCount[c]; i++ {
+    for c, num := range letterCount {
+        for i := 0; i < num; i++ {
             l.letters = append(l.letters, c)
         }
     }
-    // shuffle the bag
-    TODO: shuffle
+    // shuffle the bag - https://golang.cafe/blog/how-to-shuffle-a-slice-in-go.html
+    rand.Shuffle(len(l.letters), func(i,j int) {
+        l.letters[i], l.letters[j] = l.letters[j], l.letters[i]
+    })
 	return &l
 }
