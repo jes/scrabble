@@ -37,3 +37,26 @@ func checkPlay(b *Board, word string, x, y int, vert bool, wantScore int, t *tes
 		t.Errorf("expected %d points for '%s' at %d,%d; got %d", wantScore, word, x, y, score)
 	}
 }
+
+func TestLegal(t *testing.T) {
+	b := Board{}
+	checkLegal(&b, "hello", 4, 6, false, false, t)
+	checkLegal(&b, "hello", 4, 7, false, true, t)
+	checkLegal(&b, "loud", 6, 7, true, true, t)
+	checkLegal(&b, "murder", 5, 9, false, true, t)
+	checkLegal(&b, "foo", 0, 0, false, false, t)
+}
+
+func checkLegal(b *Board, word string, x, y int, vert bool, wantLegal bool, t *testing.T) {
+	legal := b.Legal(word, x, y, vert)
+	if legal != wantLegal {
+		legalWord := map[bool]string{
+			true:  "legal",
+			false: "illegal",
+		}
+		t.Errorf("expected %s for '%s' at %d,%d; got %s", legalWord[wantLegal], word, x, y, legalWord[legal])
+	}
+	if legal {
+		b.Play(word, x, y, vert)
+	}
+}

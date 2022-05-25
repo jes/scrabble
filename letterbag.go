@@ -17,15 +17,40 @@ var letterCount = map[byte]int{
 
 func NewLetterBag() *LetterBag {
 	l := LetterBag{}
-    // put all the letters in the bag
-    for c, num := range letterCount {
-        for i := 0; i < num; i++ {
-            l.letters = append(l.letters, c)
-        }
-    }
-    // shuffle the bag - https://golang.cafe/blog/how-to-shuffle-a-slice-in-go.html
-    rand.Shuffle(len(l.letters), func(i,j int) {
-        l.letters[i], l.letters[j] = l.letters[j], l.letters[i]
-    })
+	// put all the letters in the bag
+	for c, num := range letterCount {
+		for i := 0; i < num; i++ {
+			l.AppendLetter(c)
+		}
+	}
+	// shuffle the bag
+	l.Shuffle()
 	return &l
+}
+
+//  https://golang.cafe/blog/how-to-shuffle-a-slice-in-go.html
+func (l *LetterBag) Shuffle() {
+	rand.Shuffle(len(l.letters), func(i, j int) {
+		l.letters[i], l.letters[j] = l.letters[j], l.letters[i]
+	})
+}
+
+func (l *LetterBag) AppendLetter(c byte) {
+	l.letters = append(l.letters, c)
+	l.Shuffle()
+}
+
+func (l *LetterBag) BagEmpty() bool {
+	return len(l.letters) == 0
+}
+
+// return the next letter, or 0 if the bag is empty
+func (l *LetterBag) NextLetter() byte {
+	if l.BagEmpty() {
+		return 0
+	}
+
+	letter := l.letters[0]
+	l.letters = l.letters[1:]
+	return letter
 }

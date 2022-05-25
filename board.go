@@ -72,15 +72,6 @@ func (b *Board) Score(word string, x, y int, vertical bool) int {
 func (b *Board) Play(word string, x, y int, vertical bool) int {
 	score := b.Score(word, x, y, vertical)
 
-	// lowercase for ascii
-	lc := func(c byte) byte {
-		if c >= 'A' && c <= 'Z' {
-			return c + 'a' - 'A'
-		} else {
-			return c
-		}
-	}
-
 	for i := 0; i < len(word); i++ {
 		b.Putchar(lc(word[i]), x, y)
 		if vertical {
@@ -91,6 +82,72 @@ func (b *Board) Play(word string, x, y int, vertical bool) int {
 	}
 
 	return score
+}
+
+// return true if the given word:
+// - fits within the board confines,
+// - and doesn't conflict with any existing letters,
+// - and touches at least one existing letter or places the centre tile,
+// - and places at least one new tile,
+// - but *don't* check the dictionary,
+func (b *Board) Legal(word string, x, y int, vertical bool) bool {
+	endx := x
+	endy := y
+
+	if vertical {
+		endy += len(word)
+	} else {
+		endx += len(word)
+	}
+
+	// bounds check
+	if x < 0 || endx >= 15 || y < 0 || endy >= 15 {
+		return false
+	}
+
+	gotNewTile := false
+	gotCentreTile := false
+	gotAdjacentTile := false
+
+	dx := []int{0, 1, 0, -1}
+	dy := []int{1, 0, -1, 0}
+
+	for i := 0; i < len(word); i++ {
+		c := b.Getchar(x, y)
+		// reject non-matching chars
+		if c != 0 && lc(c) != lc(word[i]) {
+			return false
+		}
+		if c == 0 {
+			gotNewTile = true
+			if x == 7 && y == 7 {
+				gotCentreTile = true
+			}
+		}
+
+		for d := range dx {
+			if b.Getchar(x+dx[d], y+dy[d]) != 0 {
+				gotAdjacentTile = true
+			}
+		}
+
+		if vertical {
+			y++
+		} else {
+			x++
+		}
+	}
+
+	// need to play at least 1 tile
+	if !gotNewTile {
+		return false
+	}
+
+	if !gotCentreTile && !gotAdjacentTile {
+		return false
+	}
+
+	return true
 }
 
 func (b *Board) Putchar(char byte, x, y int) {
