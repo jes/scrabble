@@ -7,26 +7,26 @@ type Player interface {
 type Game struct {
 	board   *Board
 	letters *LetterBag
-	players []*Player
+	players []Player
 	scores  []int
 	turn    int
 }
 
-func NewGame() Game {
+func NewGame() *Game {
 	g := Game{}
 	g.board = &Board{}
 	g.letters = NewLetterBag()
 
-	return g
+	return &g
 }
 
-func (g *Game) AddPlayer(p *Player) {
+func (g *Game) AddPlayer(p Player) {
 	g.players = append(g.players, p)
 	g.scores = append(g.scores, 0)
 }
 
 func (g *Game) OneTurn() {
-	(*(g.players[g.turn])).Play(g)
+	g.players[g.turn].Play(g)
 }
 
 func (g *Game) NextPlayer() {
@@ -48,6 +48,7 @@ func (g *Game) Play(word string, x, y int, vertical bool) (int, bool) {
 	// TODO: check dictionary for this word and each word it touches
 
 	score := g.board.Play(word, x, y, vertical)
+	g.scores[g.turn] += score
 
 	return score, true
 }
