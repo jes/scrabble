@@ -1,0 +1,46 @@
+want a way to run a scrabble tournament between AIs
+this implies a way to run a scrabble *game* between AIs
+
+a tournament has N players, each backed by an AI strategy
+round-robin
+score for each player
+how many games each pair of players plays together
+
+a game has M<=N players, each backed by an AI strategy
+game has a board
+game has a bag of letters
+has a current turn indicator
+has a score for each player
+
+AIs can have parameters
+Maybe we specify a tournament in a file listing AI names and their parameters:
+markovdict order=2 dictsize=10000
+bestword hitrate=0.5
+bestword hitrate=1 penalisetripleword=0.5
+minimax ply=4 hitrate=0.5 counting=yes
+minimax ply=4 hitrate=1 counting=no
+
+./run-tournament --rounds=100 players.list > results.tsv
+tsv2html results.tsv > results.html
+
+Can the minimax AI consider putting 1 or more of its letters back in addition to playing what it has?
+
+Could we store the dictionary as a bidirectional trie with 26 start letters?
+
+Create a video animation of the best and worst scoring games
+
+AI strategies:
+Can they all be based on just one strategy, and everything is parameterised?
+So "bestword" is just "minimax" with ply=1
+"markovdict" is a parameter rather than a strategy
+
+Parameters:
+ - ply: minimax ply
+ - hitrate: probability of noticing a valid word
+ - counting: whether or not we count letters used from the back to form a distribution of possible opponent letters
+ - dictsize: how many of the most popular words do we know to be valid with probability 1?
+ - markovdict: are we using markov model to predict validity of unknown words? or just rejecting them all instead?
+ - order: how many letters is the "state" in the markov dictionary model
+ - penalisetripleword: by what factor do we multiply a potential score for a word that puts the opponent within range of triple word?
+
+Maybe the first word of each line in the tournament player list is a "name" for the player
