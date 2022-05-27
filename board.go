@@ -89,6 +89,7 @@ func (b *Board) Play(word string, x, y int, vertical bool) int {
 // - and doesn't conflict with any existing letters,
 // - and touches at least one existing letter or places the centre tile,
 // - and places at least one new tile,
+// - and there is a blank (or edge) immediately before and immediately after the word,
 // - but *don't* check the dictionary,
 func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 	endx := x
@@ -102,6 +103,22 @@ func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 
 	// bounds check
 	if x < 0 || endx >= 15 || y < 0 || endy >= 15 {
+		return false
+	}
+
+	// must be a blank (or edge) immediately before and immediately after
+	// e.g. you can't pretend to play "FOO" by sticking it on the end of "ELF",
+	// because that is "ELFOO"; you need to declare the true word played
+	xpre, ypre := x, y
+	xpost, ypost := endx, endy
+	if vertical {
+		ypre--
+		ypost++
+	} else {
+		xpre--
+		xpost++
+	}
+	if b.Getchar(xpre, ypre) != 0 || b.Getchar(xpost, ypost) != 0 {
 		return false
 	}
 
@@ -143,6 +160,7 @@ func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 		return false
 	}
 
+	// need to play adjacent to an existing word, or on the centre tile
 	if !gotCentreTile && !gotAdjacentTile {
 		return false
 	}

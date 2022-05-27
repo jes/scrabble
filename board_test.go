@@ -42,6 +42,7 @@ func TestLegal(t *testing.T) {
 	b := Board{}
 	checkLegal(&b, "hello", 4, 6, false, false, t)
 	checkLegal(&b, "hello", 4, 7, false, true, t)
+	checkLegal(&b, "loud", 7, 7, false, false, t)
 	checkLegal(&b, "loud", 6, 7, true, true, t)
 	checkLegal(&b, "murder", 5, 9, false, true, t)
 	checkLegal(&b, "foo", 0, 0, false, false, t)
