@@ -5,7 +5,9 @@ import (
 	"os"
 )
 
-// TODO: do we want to be able to know how popular each word is?
+// TODO: do we want to be able to know how popular each word is, so that the AI
+// can have access to a dictionary of the N most popular words rather than all
+// words, to simulate human play?
 
 type Dictionary struct {
 	words []string
