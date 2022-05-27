@@ -25,7 +25,7 @@ func TestGame(t *testing.T) {
 		vertical: []bool{true},
 	}
 
-	g := NewGame()
+	g := NewGame(NewDictionary())
 	g.AddPlayer(&player1)
 	g.AddPlayer(&player2)
 

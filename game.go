@@ -5,16 +5,18 @@ type Player interface {
 }
 
 type Game struct {
-	board   *Board
-	letters *LetterBag
-	players []Player
-	scores  []int
-	turn    int
+	board      *Board
+	dictionary *Dictionary
+	letters    *LetterBag
+	players    []Player
+	scores     []int
+	turn       int
 }
 
-func NewGame() *Game {
+func NewGame(d *Dictionary) *Game {
 	g := Game{}
 	g.board = &Board{}
+	g.dictionary = d
 	g.letters = NewLetterBag()
 
 	return &g
