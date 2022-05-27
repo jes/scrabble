@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"os"
+	"strings"
 )
 
 // TODO: do we want to be able to know how popular each word is, so that the AI
@@ -17,8 +18,9 @@ func NewDictionary() *Dictionary {
 	return &Dictionary{}
 }
 
+// insert 'word' into dictionary in lowercase
 func (d *Dictionary) AddWord(word string) {
-	d.words = append(d.words, word)
+	d.words = append(d.words, strings.ToLower(word))
 }
 
 func (d *Dictionary) AddFile(filename string) error {
@@ -35,6 +37,7 @@ func (d *Dictionary) AddFile(filename string) error {
 
 // XXX: O(n), and likely to be a substantial bottleneck
 func (d *Dictionary) HasWord(word string) bool {
+	word = strings.ToLower(word)
 	for _, w := range d.words {
 		if w == word {
 			return true

@@ -19,4 +19,11 @@ func TestDictionary(t *testing.T) {
 	if !d.HasWord("abacus") {
 		t.Errorf("'abacus' should exist now, but doesn't")
 	}
+
+	if !d.HasWord("gazelle") {
+		t.Errorf("'gazelle' should exist, but doesn't")
+	}
+	if !d.HasWord("gazELLe") {
+		t.Errorf("'gazELLe' should exist, but doesn't (dictionary should be case insensitive)")
+	}
 }
