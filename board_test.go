@@ -27,8 +27,8 @@ func TestScore(t *testing.T) {
 		t.Errorf("expected 16 points for 'hello' at 4,7; got %d", b.Score("hello", 4, 7, false))
 	}
 	checkPlay(&b, "hello", 4, 7, false, 16, t)
-	checkPlay(&b, "loud", 6, 7, true, 5, t)
-	checkPlay(&b, "murder", 5, 9, false, 16, t)
+	checkPlay(&b, "loud", 6, 7, true, 6, t)
+	checkPlay(&b, "murder", 5, 9, false, 17, t)
 }
 
 func checkPlay(b *Board, word string, x, y int, vert bool, wantScore int, t *testing.T) {

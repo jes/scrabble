@@ -56,6 +56,8 @@ func (b *Board) Score(word string, x, y int, vertical bool) int {
 		if b.Getchar(x, y) == 0 {
 			score += b.LetterMultiple(x, y) * letterScore[word[i]]
 			wordFactor *= b.WordMultiple(x, y)
+		} else {
+			score += letterScore[word[i]]
 		}
 		if vertical {
 			y++

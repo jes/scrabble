@@ -25,7 +25,9 @@ func TestGame(t *testing.T) {
 		vertical: []bool{true},
 	}
 
-	g := NewGame(NewDictionary())
+	d := NewDictionary()
+	d.AddFile("dictionary")
+	g := NewGame(d)
 	g.AddPlayer(&player1)
 	g.AddPlayer(&player2)
 
@@ -33,9 +35,9 @@ func TestGame(t *testing.T) {
 	g.OneTurn()
 	checkScores(g, 16, 0, t)
 	g.OneTurn()
-	checkScores(g, 16, 5, t)
+	checkScores(g, 16, 6, t)
 	g.OneTurn()
-	checkScores(g, 32, 5, t)
+	checkScores(g, 33, 6, t)
 }
 
 func checkScores(g *Game, score1, score2 int, t *testing.T) {

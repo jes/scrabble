@@ -47,7 +47,11 @@ func (g *Game) Play(word string, x, y int, vertical bool) (int, bool) {
 		return 0, false
 	}
 
-	// TODO: check dictionary for this word and each word it touches
+	if !g.dictionary.HasWord(word) {
+		return 0, false
+	}
+
+	// TODO: check dictionary for each word it touches
 
 	score := g.board.Play(word, x, y, vertical)
 	g.scores[g.turn] += score
