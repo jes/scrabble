@@ -46,6 +46,12 @@ func TestLegal(t *testing.T) {
 	checkLegal(&b, "loud", 6, 7, true, true, t)
 	checkLegal(&b, "murder", 5, 9, false, true, t)
 	checkLegal(&b, "foo", 0, 0, false, false, t)
+
+	checkWord(&b, 4, 6, false, "", t)
+	checkWord(&b, 4, 7, false, "hello", t)
+	checkWord(&b, 6, 7, true, "loud", t)
+	checkWord(&b, 5, 9, false, "murder", t)
+	checkWord(&b, 0, 0, false, "", t)
 }
 
 func checkLegal(b *Board, word string, x, y int, vert bool, wantLegal bool, t *testing.T) {
@@ -59,5 +65,12 @@ func checkLegal(b *Board, word string, x, y int, vert bool, wantLegal bool, t *t
 	}
 	if legal {
 		b.Play(word, x, y, vert)
+	}
+}
+
+func checkWord(b *Board, x, y int, vert bool, wantWord string, t *testing.T) {
+	word := b.GetWord(x, y, vert)
+	if word != wantWord {
+		t.Errorf("expected '%s' at %d,%d; got %s", wantWord, x, y, word)
 	}
 }

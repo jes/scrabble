@@ -184,6 +184,22 @@ func (b *Board) Getchar(x, y int) byte {
 	return b.cell[y*15+x]
 }
 
+func (b *Board) GetWord(x, y int, vertical bool) string {
+	word := ""
+	for {
+		char := b.Getchar(x, y)
+		if char == 0 {
+			return word
+		}
+		word = word + string(char)
+		if vertical {
+			y++
+		} else {
+			x++
+		}
+	}
+}
+
 // return the factor to multiply a letter played on x,y by (always 1 if cell already occupied)
 func (b *Board) LetterMultiple(x, y int) int {
 	return b.Multiple(x, y, &letterMultipleMap)
