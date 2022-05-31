@@ -37,7 +37,7 @@ So "bestword" is just "minimax" with ply=1
 Parameters:
  - ply: minimax ply
  - hitrate: probability of noticing a valid word
- - counting: whether or not we count letters used from the back to form a distribution of possible opponent letters
+ - counting: whether or not we count letters used from the bag to form a distribution of possible opponent letters
  - dictsize: how many of the most popular words do we know to be valid with probability 1?
  - markovdict: are we using markov model to predict validity of unknown words? or just rejecting them all instead?
  - order: how many letters is the "state" in the markov dictionary model
