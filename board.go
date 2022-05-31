@@ -327,7 +327,17 @@ func (b *Board) String() string {
 	for y := 0; y < 15; y++ {
 		for x := 0; x < 15; x++ {
 			if b.Getchar(x, y) == 0 {
-				s += "."
+				if b.WordMultiple(x, y) == 2 {
+					s += "D"
+				} else if b.WordMultiple(x, y) == 3 {
+					s += "T"
+				} else if b.LetterMultiple(x, y) == 2 {
+					s += "2"
+				} else if b.LetterMultiple(x, y) == 3 {
+					s += "3"
+				} else {
+					s += "."
+				}
 			} else {
 				s += string(b.Getchar(x, y))
 			}

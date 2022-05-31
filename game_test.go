@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 type MockPlayer struct {
 	word     []string
@@ -21,10 +24,10 @@ func TestGame(t *testing.T) {
 	}
 
 	player2 := MockPlayer{
-		word:     []string{"loud"},
-		x:        []int{6},
-		y:        []int{7},
-		vertical: []bool{true},
+		word:     []string{"loud", "here"},
+		x:        []int{6, 9},
+		y:        []int{7, 10},
+		vertical: []bool{true, false},
 		t:        t,
 	}
 
@@ -41,10 +44,13 @@ func TestGame(t *testing.T) {
 	checkScores(g, 16, 6, t)
 	g.OneTurn()
 	checkScores(g, 33, 6, t)
+	g.OneTurn()
+	checkScores(g, 33, 29, t)
 }
 
 func checkScores(g *Game, score1, score2 int, t *testing.T) {
 	if g.scores[0] != score1 || g.scores[1] != score2 {
+		fmt.Println(g.board)
 		t.Errorf("expected scores = %d,%d; got %d,%d", score1, score2, g.scores[0], g.scores[1])
 	}
 }
