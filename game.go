@@ -5,18 +5,17 @@ type Player interface {
 }
 
 type Game struct {
-	board      *Board
-	dictionary *Dictionary
-	letters    *LetterBag
-	players    []Player
-	scores     []int
-	turn       int
+	board   *Board
+	letters *LetterBag
+	players []Player
+	scores  []int
+	turn    int
 }
 
 func NewGame(d *Dictionary) *Game {
 	g := Game{}
-	g.board = &Board{}
-	g.dictionary = d
+	board := NewBoard(d)
+	g.board = &board
 	g.letters = NewLetterBag()
 
 	return &g
@@ -35,72 +34,11 @@ func (g *Game) NextPlayer() {
 	g.turn = (g.turn + 1) % len(g.players)
 }
 
-// is every created word in the dictionary?
-// XXX: make sure this function always works on its "newBoard" argument
-// rather than g.board!!
-//
-// for each letter of the word:
-// scan back, perpendicular to the word, to find the start of the other word
-// if this word is only length 1, ignore it
-// otherwise if it's not in the dictionary, reject
-// otherwise recurse on that word
-// we need the map saying which coordinates we've already checked, otherwise
-// there can be cycles:
-//     IN
-//     NO
-// we would check "IN" horizontally, then "IN" vertically, then "NO"
-// horizontally, then "NO" vertically, and end up back at "IN" horizontally, etc.
-func (g *Game) LegalWords(newBoard *Board, x, y int, vertical bool, checked *map[int]bool) bool {
-	// walk back to find the start of the word
-	for {
-		nx, ny := x, y
-		if vertical {
-			ny--
-		} else {
-			nx--
-		}
-		if newBoard.Getchar(nx, ny) == 0 {
-			break
-		}
-		x, y = nx, ny
-	}
-
-	// skip checks we've already done
-	if (*checked)[y*15+x] {
-		return true
-	}
-	(*checked)[y*15+x] = true
-
-	// check this word
-	word := newBoard.GetWord(x, y, vertical)
-
-	if len(word) == 1 {
-		// only 1 character long: there is no perpendicular word here
-		return true
-	}
-	if !g.dictionary.HasWord(word) {
-		return false
-	}
-
-	// check every perpendicular word
-	for {
-		if newBoard.Getchar(x, y) == 0 {
-			break
-		}
-		if !g.LegalWords(newBoard, x, y, !vertical, checked) {
-			return false
-		}
-		if vertical {
-			y++
-		} else {
-			x++
-		}
-	}
-
-	return true
-}
-
 // API for Players:
+
+func (g *Game) Legal(word string, x, y int, vertical bool) bool {
+	return g.board.Legal(word, x, y, vertical)
+}
 
 // play the given word, with legality check;
 // return (score, ok)
@@ -113,25 +51,8 @@ func (g *Game) Play(word string, x, y int, vertical bool) (int, bool) {
 		return 0, false
 	}
 
-	// is this word in the dictionary?
-	// XXX: we need this check separately from g.LegalWords(), otherwise any
-	// single-character word would be accepted on the centre tile on the turn 1
-	if !g.dictionary.HasWord(word) {
-		return 0, false
-	}
-
-	// play the move on a copy of the board
-	newBoard := *g.board
-	score := newBoard.Play(word, x, y, vertical)
-
-	// and check if every created word is also in the dictionary
-	checked := make(map[int]bool)
-	if !g.LegalWords(&newBoard, x, y, vertical, &checked) {
-		return 0, false
-	}
-
-	// move accepted
-	g.board = &newBoard
+	// play the move
+	score := g.board.Play(word, x, y, vertical)
 	g.scores[g.turn] += score
 
 	return score, true

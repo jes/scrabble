@@ -8,6 +8,7 @@ type MockPlayer struct {
 	y        []int
 	vertical []bool
 	turn     int
+	t        *testing.T
 }
 
 func TestGame(t *testing.T) {
@@ -16,6 +17,7 @@ func TestGame(t *testing.T) {
 		x:        []int{4, 5},
 		y:        []int{7, 9},
 		vertical: []bool{false, false},
+		t:        t,
 	}
 
 	player2 := MockPlayer{
@@ -23,6 +25,7 @@ func TestGame(t *testing.T) {
 		x:        []int{6},
 		y:        []int{7},
 		vertical: []bool{true},
+		t:        t,
 	}
 
 	d := NewDictionary()
@@ -42,11 +45,15 @@ func TestGame(t *testing.T) {
 
 func checkScores(g *Game, score1, score2 int, t *testing.T) {
 	if g.scores[0] != score1 || g.scores[1] != score2 {
-		t.Errorf("expexted scores = %d,%d; got %d,%d", score1, score2, g.scores[0], g.scores[1])
+		t.Errorf("expected scores = %d,%d; got %d,%d", score1, score2, g.scores[0], g.scores[1])
 	}
 }
 
 func (p *MockPlayer) Play(g *Game) {
+	if !g.Legal(p.word[p.turn], p.x[p.turn], p.y[p.turn], p.vertical[p.turn]) {
+		p.t.Errorf("'%s' at %d,%d is illegal; expected it to be legal", p.word[p.turn], p.x[p.turn], p.y[p.turn])
+	}
+
 	g.Play(p.word[p.turn], p.x[p.turn], p.y[p.turn], p.vertical[p.turn])
 	p.turn++
 }

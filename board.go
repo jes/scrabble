@@ -1,7 +1,8 @@
 package main
 
 type Board struct {
-	cell [225]byte
+	cell       [225]byte
+	dictionary *Dictionary
 }
 
 var wordMultipleMap = map[int]int{
@@ -41,13 +42,28 @@ var letterScore = map[byte]int{
 	'z': 10,
 }
 
-func NewBoard() Board {
-	return Board{}
+func NewBoard(d *Dictionary) Board {
+	return Board{dictionary: d}
 }
 
 // return the score for playing the given word at the given position, with no legality check;
 // words should be all lowercase, except for blank tiles which should be uppercase
 func (b *Board) Score(word string, x, y int, vertical bool) int {
+	score := 0
+
+	// play the word on a copy of the board
+	newBoard := *b
+	newBoard.PutWord(word, x, y, vertical)
+
+	b.ScanWords(&newBoard, x, y, vertical, func(word string, x, y int, vertical bool) {
+		score += b.OneWordScore(word, x, y, vertical)
+	}, true)
+
+	return score
+}
+
+// score just 1 word, without regard for adjacent words
+func (b *Board) OneWordScore(word string, x, y int, vertical bool) int {
 	score := 0
 
 	wordFactor := 1
@@ -74,16 +90,76 @@ func (b *Board) Score(word string, x, y int, vertical bool) int {
 func (b *Board) Play(word string, x, y int, vertical bool) int {
 	score := b.Score(word, x, y, vertical)
 
-	for i := 0; i < len(word); i++ {
-		b.Putchar(lc(word[i]), x, y)
-		if vertical {
-			y++
-		} else {
-			x++
-		}
-	}
+	b.PutWord(word, x, y, vertical)
 
 	return score
+}
+
+// is every created word in the dictionary?
+func (b *Board) LegalWords(newBoard *Board, x, y int, vertical bool) bool {
+	if !b.dictionary.HasWord(newBoard.GetWord(x, y, vertical)) {
+		return false
+	}
+
+	allLegal := true
+	b.ScanWords(newBoard, x, y, vertical, func(word string, x, y int, vertical bool) {
+		allLegal = allLegal && b.dictionary.HasWord(word)
+	}, true)
+	return allLegal
+}
+
+// find the new words created in newBoard starting from x,y, and
+// pass them to cb()
+//
+// scan backwards to find the start of the word
+// if the word is only length 1, ignore it
+// if the word contains no newly-played characters, ignore it
+// call cb()
+// if "recurse", then recurse for each perpendicular word
+func (b *Board) ScanWords(newBoard *Board, x, y int, vertical bool, cb func(string, int, int, bool), recurse bool) {
+	// walk back to find the start of the word
+	for {
+		nx, ny := x, y
+		if vertical {
+			ny--
+		} else {
+			nx--
+		}
+		if newBoard.Getchar(nx, ny) == 0 {
+			break
+		}
+		x, y = nx, ny
+	}
+
+	// check that this word is new
+	word := newBoard.GetWord(x, y, vertical)
+	existingWord := b.GetWord(x, y, vertical)
+	if word == existingWord {
+		return
+	}
+
+	if len(word) == 1 {
+		// only 1 character long: there is no perpendicular word here
+		return
+	}
+
+	// pass word to callback
+	cb(word, x, y, vertical)
+
+	// recurse for every perpendicular word
+	if recurse {
+		for {
+			if newBoard.Getchar(x, y) == 0 {
+				break
+			}
+			b.ScanWords(newBoard, x, y, !vertical, cb, false)
+			if vertical {
+				y++
+			} else {
+				x++
+			}
+		}
+	}
 }
 
 // return true if the given word:
@@ -92,7 +168,7 @@ func (b *Board) Play(word string, x, y int, vertical bool) int {
 // - and touches at least one existing letter or places the centre tile,
 // - and places at least one new tile,
 // - and there is a blank (or edge) immediately before and immediately after the word,
-// - but *don't* check the dictionary,
+// - and this word and every adjacent word is in the dictionary
 func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 	endx := x
 	endy := y
@@ -131,29 +207,31 @@ func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 	dx := []int{0, 1, 0, -1}
 	dy := []int{1, 0, -1, 0}
 
+	px, py := x, y
+
 	for i := 0; i < len(word); i++ {
-		c := b.Getchar(x, y)
+		c := b.Getchar(px, py)
 		// reject non-matching chars
 		if c != 0 && lc(c) != lc(word[i]) {
 			return false
 		}
 		if c == 0 {
 			gotNewTile = true
-			if x == 7 && y == 7 {
+			if px == 7 && py == 7 {
 				gotCentreTile = true
 			}
 		}
 
 		for d := range dx {
-			if b.Getchar(x+dx[d], y+dy[d]) != 0 {
+			if b.Getchar(px+dx[d], py+dy[d]) != 0 {
 				gotAdjacentTile = true
 			}
 		}
 
 		if vertical {
-			y++
+			py++
 		} else {
-			x++
+			px++
 		}
 	}
 
@@ -165,6 +243,16 @@ func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 	// need to play adjacent to an existing word, or on the centre tile
 	if !gotCentreTile && !gotAdjacentTile {
 		return false
+	}
+
+	// play the move on a copy of the board and work out whether
+	// this word and all of the adjacent words are in the dictionary
+	if b.dictionary != nil {
+		newBoard := *b
+		newBoard.Play(word, x, y, vertical)
+		if !b.LegalWords(&newBoard, x, y, vertical) {
+			return false
+		}
 	}
 
 	return true
@@ -182,6 +270,17 @@ func (b *Board) Getchar(x, y int) byte {
 		return 0
 	}
 	return b.cell[y*15+x]
+}
+
+func (b *Board) PutWord(word string, x, y int, vertical bool) {
+	for i := 0; i < len(word); i++ {
+		b.Putchar(lc(word[i]), x, y)
+		if vertical {
+			y++
+		} else {
+			x++
+		}
+	}
 }
 
 func (b *Board) GetWord(x, y int, vertical bool) string {
@@ -221,4 +320,19 @@ func (b *Board) Multiple(x, y int, m *map[int]int) int {
 		return 1
 	}
 	return multiple
+}
+
+func (b *Board) String() string {
+	s := ""
+	for y := 0; y < 15; y++ {
+		for x := 0; x < 15; x++ {
+			if b.Getchar(x, y) == 0 {
+				s += "."
+			} else {
+				s += string(b.Getchar(x, y))
+			}
+		}
+		s += "\n"
+	}
+	return s
 }
