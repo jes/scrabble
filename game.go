@@ -89,6 +89,16 @@ func (g *Game) SwapLetters(letters []byte) []byte {
 	return newLetters
 }
 
+// Get a letter from the bag:
+// (char, true) if a letter was taken
+// (0, false) if the bag is empty
+func (g *Game) GetLetter() (byte, bool) {
+	if g.letters.BagEmpty() {
+		return 0, false
+	}
+	return g.letters.NextLetter(), true
+}
+
 // Skip the turn without swapping any letters
 func (g *Game) SkipTurn() {
 	g.NextPlayer()
