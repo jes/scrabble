@@ -44,3 +44,8 @@ Parameters:
  - penalisetripleword: by what factor do we multiply a potential score for a word that puts the opponent within range of triple word?
 
 Maybe the first word of each line in the tournament player list is a "name" for the player
+
+We can ask questions like:
+ - how much dictionary knowledge is required to make up for a poor hit rate?
+ - how much hit rate is required to make up for poor dictionary knowledge?
+for all of hitrate, dictionaryknowledge, searchply, bagcounting

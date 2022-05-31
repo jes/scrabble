@@ -1,0 +1,39 @@
+without loss of generality, assume we can only play horizontally (because we'll just attempt the same strategy again
+with the board transposed to find vertical words)
+
+for each point on the board, we try every combination of placing our letters there and see what we score
+
+optimisations:
+ * don't try to place in rows that don't have characters in that row, or above, or below
+ * don't try to place in columns that don't have any characters in that row, or above, or below, within the length we can reach
+ * use a trie for the dictionary and don't try appending unused letter ch if we run out of trie
+ * cut off search early if we form an illegal adjacent word
+
+for each row y
+    for each column x
+        word,score := dfs(x,y,x,y,"")
+        if score > bestscore {
+            bestword, bestscore, bestx, besty = word,score,x,y
+        }
+
+func dfs(startx,starty,x,y int, word string) (string, int) {
+    bestword, bestscore := "",0
+    if LegalMove(word,startx,starty) {
+        bestword, bestscore := Score(word,startx,starty)
+    }
+
+    for each unused letter ch {
+        if ch == " " then try all of 'A'..'Z'
+        mark ch as used
+        word,score := dfs(startx,starty,x+1,y,word+ch)
+        mark ch as unused
+        if score > bestscore {
+            bestword,bestscore = word,score
+        }
+    }
+
+    return bestword,bestscore
+}
+
+AI has a bag of letters []byte
+After playing a word, 
