@@ -164,6 +164,7 @@ func (b *Board) ScanWords(newBoard *Board, x, y int, vertical bool, cb func(stri
 
 // return true if the given word:
 // - fits within the board confines,
+// - and is at least 2 characters long,
 // - and doesn't conflict with any existing letters,
 // - and touches at least one existing letter or places the centre tile,
 // - and places at least one new tile,
@@ -181,6 +182,14 @@ func (b *Board) Legal(word string, x, y int, vertical bool) bool {
 
 	// bounds check
 	if x < 0 || endx >= 15 || y < 0 || endy >= 15 {
+		return false
+	}
+
+	// disallow length-1 words, otherwise you can gain
+	// spurious points, for example turning "head"
+	// into "ahead" by claiming that you're playing the vertical
+	// word "a" and scoring an additional horizontal word "ahead"
+	if len(word) <= 1 {
 		return false
 	}
 
@@ -327,17 +336,7 @@ func (b *Board) String() string {
 	for y := 0; y < 15; y++ {
 		for x := 0; x < 15; x++ {
 			if b.Getchar(x, y) == 0 {
-				if b.WordMultiple(x, y) == 2 {
-					s += "D"
-				} else if b.WordMultiple(x, y) == 3 {
-					s += "T"
-				} else if b.LetterMultiple(x, y) == 2 {
-					s += "2"
-				} else if b.LetterMultiple(x, y) == 3 {
-					s += "3"
-				} else {
-					s += "."
-				}
+				s += "."
 			} else {
 				s += string(b.Getchar(x, y))
 			}

@@ -28,6 +28,10 @@ func NewLetterBag() *LetterBag {
 	return &l
 }
 
+func (l *LetterBag) Empty() {
+	l.letters = make([]byte, 0)
+}
+
 //  https://golang.cafe/blog/how-to-shuffle-a-slice-in-go.html
 func (l *LetterBag) Shuffle() {
 	rand.Shuffle(len(l.letters), func(i, j int) {
@@ -40,8 +44,12 @@ func (l *LetterBag) AppendLetter(c byte) {
 	l.Shuffle()
 }
 
+func (l *LetterBag) BagSize() int {
+	return len(l.letters)
+}
+
 func (l *LetterBag) BagEmpty() bool {
-	return len(l.letters) == 0
+	return l.BagSize() == 0
 }
 
 // return the next letter, or 0 if the bag is empty
@@ -53,4 +61,12 @@ func (l *LetterBag) NextLetter() byte {
 	letter := l.letters[0]
 	l.letters = l.letters[1:]
 	return letter
+}
+
+func (l *LetterBag) String() string {
+	s := ""
+	for i := range l.letters {
+		s += string(l.letters[i])
+	}
+	return s
 }

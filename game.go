@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 type Player interface {
 	Play(*Game)
 }
@@ -48,12 +52,15 @@ func (g *Game) Play(word string, x, y int, vertical bool) (int, bool) {
 
 	// is this play mechanically legal on this board?
 	if !g.board.Legal(word, x, y, vertical) {
+		fmt.Printf("illegal move!!!\n")
 		return 0, false
 	}
 
 	// play the move
 	score := g.board.Play(word, x, y, vertical)
 	g.scores[g.turn] += score
+
+	fmt.Printf("Player %d plays %s\n", g.turn+1, word)
 
 	return score, true
 }
@@ -63,6 +70,8 @@ func (g *Game) Play(word string, x, y int, vertical bool) (int, bool) {
 // if there aren't enough letters left in the bag
 // then only the amount that are left will be swapped
 func (g *Game) SwapLetters(letters []byte) []byte {
+	fmt.Printf("Player %d swaps letters: %v\n", g.turn+1, letters)
+
 	newLetters := make([]byte, 0)
 
 	rebag := make([]byte, 0)
